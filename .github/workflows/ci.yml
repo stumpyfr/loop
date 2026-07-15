@@ -49,7 +49,7 @@ jobs:
           NO_COLOR=1 go run . render --details testdata/valid_loop.yml >/tmp/valid_loop.rendered.txt
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: loop-cli-coverage
           path: coverage.out
