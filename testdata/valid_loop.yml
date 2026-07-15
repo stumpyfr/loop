@@ -1,0 +1,57 @@
+apiVersion: loophub.dev/v1alpha1
+kind: EngineeringLoop
+
+metadata:
+    name: valid_loop
+    version: 0.1.0
+    title: Valid Test Loop
+    description: >
+        A compact loop used by loop_cli tests and CI smoke validation.
+
+spec:
+    objective: >
+        Validate loop_cli parsing, schema validation, and rendering with a local fixture.
+    inputs:
+        ticket:
+            type: string
+            required: true
+            description: Ticket or request identifier.
+
+phases:
+    - name: inspect
+      title: Inspect
+      objective: >
+          Inspect the request and identify what needs to happen.
+      actions:
+          - Read the request.
+          - Identify the expected outcome.
+      completion:
+          - The expected outcome is clear.
+      outputs:
+          - status: ["completed", "blocked", "escalated"]
+          - findings: [string]
+      transitions:
+          - to: report
+            condition: >
+                If the request is understood, prepare the report.
+
+    - name: report
+      title: Report
+      objective: >
+          Report the result.
+      actions:
+          - Summarize the findings.
+      completion:
+          - The report is complete.
+      outputs:
+          - status: ["completed", "blocked", "escalated"]
+          - summary: string
+
+escalation:
+    principle: >
+        Escalate only when required input is missing or ambiguous.
+    escalation_inputs:
+        - name: question
+          type: string
+          description: >
+              The clarification question to ask before continuing.
