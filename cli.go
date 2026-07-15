@@ -110,12 +110,12 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 
 func parsePushOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "push"
-	fs := flag.NewFlagSet("loop_cli push", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop push", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.StringVar(&opts.artifactType, "artifact-type", opts.artifactType, "OCI artifact type for the package manifest")
 	fs.StringVar(&opts.layerType, "layer-media-type", opts.layerType, "OCI media type for the YAML layer")
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli push [flags] <local.yml> <registry/namespace/package_name:tag>\n\n")
+		fmt.Fprintf(stderr, "Usage: loop push [flags] <local.yml> <registry/namespace/package_name:tag>\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -144,12 +144,12 @@ func parsePushOptions(args []string, opts options, stderr io.Writer) (options, e
 
 func parsePullOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "pull"
-	fs := flag.NewFlagSet("loop_cli pull", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop pull", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.StringVar(&opts.output, "output", opts.output, "also copy pulled YAML to a file")
 	fs.StringVar(&opts.layerType, "layer-media-type", opts.layerType, "OCI media type for the YAML layer")
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli pull [flags] <registry/namespace/package_name:tag>\n\n")
+		fmt.Fprintf(stderr, "Usage: loop pull [flags] <registry/namespace/package_name:tag>\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -177,11 +177,11 @@ func parsePullOptions(args []string, opts options, stderr io.Writer) (options, e
 
 func parseRunOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "run"
-	fs := flag.NewFlagSet("loop_cli run", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop run", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.StringVar(&opts.layerType, "layer-media-type", opts.layerType, "OCI media type for the YAML layer")
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli run [flags] <registry/namespace/package_name:tag>\n\n")
+		fmt.Fprintf(stderr, "Usage: loop run [flags] <registry/namespace/package_name:tag>\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -209,13 +209,13 @@ func parseRunOptions(args []string, opts options, stderr io.Writer) (options, er
 
 func parseRenderOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "render"
-	fs := flag.NewFlagSet("loop_cli render", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop render", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.BoolVar(&opts.renderNoColor, "no-color", opts.renderNoColor, "disable ANSI color output")
 	fs.BoolVar(&opts.renderDetails, "details", opts.renderDetails, "include compact phase actions, completion, and output summaries")
 	fs.StringVar(&opts.layerType, "layer-media-type", opts.layerType, "OCI media type for the YAML layer")
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli render [flags] <local.yml|registry/namespace/package_name:tag>\n\n")
+		fmt.Fprintf(stderr, "Usage: loop render [flags] <local.yml|registry/namespace/package_name:tag>\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -248,10 +248,10 @@ func parseRenderOptions(args []string, opts options, stderr io.Writer) (options,
 
 func parseValidateOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "validate"
-	fs := flag.NewFlagSet("loop_cli validate", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop validate", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli validate <local.yml>\n\n")
+		fmt.Fprintf(stderr, "Usage: loop validate <local.yml>\n\n")
 	}
 	if wantsHelp(args) {
 		opts.command = "help"
@@ -274,11 +274,11 @@ func parseValidateOptions(args []string, opts options, stderr io.Writer) (option
 func parseInitOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "init"
 	opts.agentsFile = "AGENTS.md"
-	fs := flag.NewFlagSet("loop_cli init", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop init", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.StringVar(&opts.agentsFile, "agents-file", opts.agentsFile, "path to the agent instruction file to update")
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli init [flags]\n\n")
+		fmt.Fprintf(stderr, "Usage: loop init [flags]\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -299,10 +299,10 @@ func parseInitOptions(args []string, opts options, stderr io.Writer) (options, e
 
 func parseQuickstartOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "quickstart"
-	fs := flag.NewFlagSet("loop_cli quickstart", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop quickstart", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli quickstart\n\n")
+		fmt.Fprintf(stderr, "Usage: loop quickstart\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -323,10 +323,10 @@ func parseQuickstartOptions(args []string, opts options, stderr io.Writer) (opti
 
 func parsePrimeOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "prime"
-	fs := flag.NewFlagSet("loop_cli prime", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop prime", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli prime\n\n")
+		fmt.Fprintf(stderr, "Usage: loop prime\n\n")
 		fs.PrintDefaults()
 	}
 	if wantsHelp(args) {
@@ -347,10 +347,10 @@ func parsePrimeOptions(args []string, opts options, stderr io.Writer) (options, 
 
 func parseHelpOptions(args []string, opts options, stderr io.Writer) (options, error) {
 	opts.command = "help"
-	fs := flag.NewFlagSet("loop_cli help", flag.ContinueOnError)
+	fs := flag.NewFlagSet("loop help", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "Usage: loop_cli help [command]\n\n")
+		fmt.Fprintf(stderr, "Usage: loop help [command]\n\n")
 	}
 
 	if err := fs.Parse(args); err != nil {

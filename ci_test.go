@@ -23,7 +23,7 @@ func TestMainReturnsForHelpCommand(t *testing.T) {
 	defer func() {
 		os.Args = oldArgs
 	}()
-	os.Args = []string{"loop_cli", "help", "validate"}
+	os.Args = []string{"loop", "help", "validate"}
 	main()
 }
 
@@ -54,8 +54,8 @@ func TestRunInitCreatesAgentsFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read agents file: %v", err)
 	}
-	if !strings.Contains(string(data), "loop_cli prime") {
-		t.Fatalf("agents file does not mention loop_cli prime:\n%s", string(data))
+	if !strings.Contains(string(data), "loop prime") {
+		t.Fatalf("agents file does not mention loop prime:\n%s", string(data))
 	}
 
 	stdout.Reset()
@@ -75,8 +75,8 @@ func TestRunHelpQuickstartAndPrimePrintGuidance(t *testing.T) {
 		args []string
 		want string
 	}{
-		{name: "help", args: []string{"help", "validate"}, want: "loop_cli validate <local.yml>"},
-		{name: "quickstart", args: []string{"quickstart"}, want: "loop_cli validate ./loop.yml"},
+		{name: "help", args: []string{"help", "validate"}, want: "loop validate <local.yml>"},
+		{name: "quickstart", args: []string{"quickstart"}, want: "loop validate ./loop.yml"},
 		{name: "prime", args: []string{"prime"}, want: "Agent Role"},
 	}
 
@@ -103,7 +103,7 @@ func TestRunUnknownCommandReturnsUsageAndError(t *testing.T) {
 	if !strings.Contains(err.Error(), `unknown command "wat"`) {
 		t.Fatalf("error = %v", err)
 	}
-	if !strings.Contains(stderr.String(), "loop_cli [command]") {
+	if !strings.Contains(stderr.String(), "loop [command]") {
 		t.Fatalf("stderr does not contain usage:\n%s", stderr.String())
 	}
 }
@@ -140,7 +140,7 @@ func TestRunWithoutCommandPrintsUsage(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "expected command") {
 		t.Fatalf("expected command error, got %v", err)
 	}
-	if !strings.Contains(stderr.String(), "loop_cli [command]") {
+	if !strings.Contains(stderr.String(), "loop [command]") {
 		t.Fatalf("stderr missing usage:\n%s", stderr.String())
 	}
 }
@@ -194,7 +194,7 @@ func TestCachedFilePathUsesStableHashUnderCacheDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("cachedFilePath returned error: %v", err)
 	}
-	if !strings.Contains(got, filepath.Join("loop_cli", "refs")+string(os.PathSeparator)) {
+	if !strings.Contains(got, filepath.Join("loop", "refs")+string(os.PathSeparator)) {
 		t.Fatalf("cached path %q does not use test cache dir %q", got, cacheDir)
 	}
 	if filepath.Ext(got) != ".yml" {

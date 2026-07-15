@@ -43,7 +43,7 @@ func cachedFilePath(ref string) (string, error) {
 		return "", fmt.Errorf("find user cache dir: %w", err)
 	}
 	sum := sha256.Sum256([]byte(ref))
-	dir := filepath.Join(cacheDir, "loop_cli", "refs")
+	dir := filepath.Join(cacheDir, "loop", "refs")
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return "", fmt.Errorf("create cache dir: %w", err)
 	}

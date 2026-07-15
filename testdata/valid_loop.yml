@@ -6,11 +6,11 @@ metadata:
     version: 0.1.0
     title: Valid Test Loop
     description: >
-        A compact loop used by loop_cli tests and CI smoke validation.
+        A compact loop used by loop tests and CI smoke validation.
 
 spec:
     objective: >
-        Validate loop_cli parsing, schema validation, and rendering with a local fixture.
+        Validate loop parsing, schema validation, and rendering with a local fixture.
     inputs:
         ticket:
             type: string

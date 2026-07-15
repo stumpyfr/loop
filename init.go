@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	loopIntegrationBegin = "<!-- BEGIN LOOP CLI INTEGRATION v:1 -->"
-	loopIntegrationEnd   = "<!-- END LOOP CLI INTEGRATION -->"
+	loopIntegrationBegin = "<!-- BEGIN LOOP INTEGRATION v:1 -->"
+	loopIntegrationEnd   = "<!-- END LOOP INTEGRATION -->"
 )
 
 func updateAgentsFile(filename string) (string, error) {
@@ -65,7 +65,7 @@ func updateAgentsContent(current string) (string, bool, error) {
 		next := current[:begin] + block + current[end:]
 		return next, next != current, nil
 	case begin >= 0 || end >= 0:
-		return "", false, errors.New("AGENTS.md has a partial loop_cli integration block")
+		return "", false, errors.New("AGENTS.md has a partial loop integration block")
 	}
 
 	if strings.TrimSpace(current) == "" {
@@ -78,26 +78,26 @@ func updateAgentsContent(current string) (string, bool, error) {
 func loopAgentsBlock() string {
 	return strings.Join([]string{
 		loopIntegrationBegin,
-		"## Loop CLI",
+		"## Loop",
 		"",
-		"This project uses **loop_cli** for OCI-backed YAML loop packages.",
+		"This project uses **loop** for OCI-backed YAML loop packages.",
 		"",
 		"### Agent Rules",
 		"",
-		"- Run `loop_cli prime` before executing a loop package.",
-		"- Use `loop_cli validate <loop.yml>` before packaging or publishing local loop files.",
-		"- Use `loop_cli pull <ref>` to cache a package and `loop_cli run <ref>` to print the loop YAML.",
-		"- When running a loop, act only as the orchestrator described by `loop_cli prime`.",
-		"- Do not copy the full prime instructions here; `loop_cli prime` is the source of current workflow guidance.",
+		"- Run `loop prime` before executing a loop package.",
+		"- Use `loop validate <loop.yml>` before packaging or publishing local loop files.",
+		"- Use `loop pull <ref>` to cache a package and `loop run <ref>` to print the loop YAML.",
+		"- When running a loop, act only as the orchestrator described by `loop prime`.",
+		"- Do not copy the full prime instructions here; `loop prime` is the source of current workflow guidance.",
 		"",
 		"### Quick Reference",
 		"",
 		"```bash",
-		"loop_cli prime",
-		"loop_cli validate ./loop.yml",
-		"loop_cli render ./loop.yml",
-		"loop_cli pull ghcr.io/owner/repo/package:tag",
-		"loop_cli run ghcr.io/owner/repo/package:tag",
+		"loop prime",
+		"loop validate ./loop.yml",
+		"loop render ./loop.yml",
+		"loop pull ghcr.io/owner/repo/package:tag",
+		"loop run ghcr.io/owner/repo/package:tag",
 		"```",
 		loopIntegrationEnd,
 	}, "\n")

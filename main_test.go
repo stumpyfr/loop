@@ -466,14 +466,14 @@ func TestPrintQuickstartProvidesHumanIntro(t *testing.T) {
 	printQuickstart(&stdout, options{})
 	got := stdout.String()
 	for _, want := range []string{
-		"loop_cli - OCI-backed YAML loop packages",
+		"loop - OCI-backed YAML loop packages",
 		"GETTING STARTED",
-		"loop_cli init",
-		"loop_cli validate ./loop.yml",
-		"loop_cli render ./loop.yml",
-		"loop_cli push ./loop.yml ghcr.io/owner/repo/package:tag",
+		"loop init",
+		"loop validate ./loop.yml",
+		"loop render ./loop.yml",
+		"loop push ./loop.yml ghcr.io/owner/repo/package:tag",
 		"docker login ghcr.io",
-		"Run `loop_cli prime` for agent-oriented workflow instructions.",
+		"Run `loop prime` for agent-oriented workflow instructions.",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -486,7 +486,7 @@ func TestPrintPrimeProvidesAgentDocs(t *testing.T) {
 	printPrime(&stdout, options{})
 	got := stdout.String()
 	for _, want := range []string{
-		"# Loop CLI Agent Quickstart",
+		"# Loop Agent Quickstart",
 		"The main agent is an orchestrator only.",
 		"Read the loop from the CLI output and execute it as the instruction source for the run.",
 		"Do not perform independent exploration, repository changes, file edits, or phase work yourself.",
@@ -498,8 +498,8 @@ func TestPrintPrimeProvidesAgentDocs(t *testing.T) {
 		"Add a `summary` section to the final report containing `status`, `objective`, `outcome`, and `duration_in_seconds`.",
 		"Ensure each phase report contains only outputs defined by that phase",
 		"`registry/namespace/package_name:tag`",
-		"`loop_cli pull ghcr.io/owner/repo/package:tag`",
-		"`loop_cli run ghcr.io/owner/repo/package:tag`",
+		"`loop pull ghcr.io/owner/repo/package:tag`",
+		"`loop run ghcr.io/owner/repo/package:tag`",
 		"treat that YAML as the execution instructions",
 		"Inspect `spec.inputs` before starting the loop.",
 		"Ask the user for any missing required input values before running phases.",
@@ -532,11 +532,11 @@ func TestPrintHelpGuidesAgentsToPrime(t *testing.T) {
 		"Package Commands:",
 		"render      Display a loop as a terminal flowchart",
 		"validate    Validate a local loop YAML file",
-		"init        Add loop_cli agent instructions to AGENTS.md",
+		"init        Add loop agent instructions to AGENTS.md",
 		"Agent Commands:",
 		"prime       Show AI-optimized workflow context for agents",
-		"Agents should run `loop_cli prime` before running a loop package.",
-		"Use \"loop_cli help [command]\" for more information about a command.",
+		"Agents should run `loop prime` before running a loop package.",
+		"Use \"loop help [command]\" for more information about a command.",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -550,7 +550,7 @@ func TestPrintRenderHelp(t *testing.T) {
 	got := stdout.String()
 	for _, want := range []string{
 		"Display a loop as a terminal flowchart.",
-		"loop_cli render [flags] <local.yml|registry/namespace/package_name:tag>",
+		"loop render [flags] <local.yml|registry/namespace/package_name:tag>",
 		"phases, transitions, self-loops, and root escalation inputs",
 		"-details",
 		"-no-color",
@@ -567,7 +567,7 @@ func TestPrintValidateHelp(t *testing.T) {
 	got := stdout.String()
 	for _, want := range []string{
 		"Validate a local loop YAML file.",
-		"loop_cli validate <local.yml>",
+		"loop validate <local.yml>",
 		"embedded loop JSON Schema",
 	} {
 		if !strings.Contains(got, want) {
@@ -581,9 +581,9 @@ func TestPrintInitHelp(t *testing.T) {
 	printHelp(&stdout, "init")
 	got := stdout.String()
 	for _, want := range []string{
-		"Add loop_cli agent instructions to AGENTS.md.",
-		"loop_cli init [flags]",
-		"points agents to `loop_cli prime`",
+		"Add loop agent instructions to AGENTS.md.",
+		"loop init [flags]",
+		"points agents to `loop prime`",
 		"-agents-file string",
 	} {
 		if !strings.Contains(got, want) {
@@ -598,9 +598,9 @@ func TestPrintRunHelpGuidesAgentsToPrime(t *testing.T) {
 	got := stdout.String()
 	for _, want := range []string{
 		"Usage:",
-		"loop_cli run [flags] <registry/namespace/package_name:tag>",
+		"loop run [flags] <registry/namespace/package_name:tag>",
 		"Agent Note:",
-		"Run `loop_cli prime` first when an agent is asked to execute a loop.",
+		"Run `loop prime` first when an agent is asked to execute a loop.",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -698,8 +698,8 @@ func TestUpdateAgentsContentAppendsManagedBlock(t *testing.T) {
 	for _, want := range []string{
 		"# Agent Instructions",
 		loopIntegrationBegin,
-		"Run `loop_cli prime` before executing a loop package.",
-		"loop_cli render ./loop.yml",
+		"Run `loop prime` before executing a loop package.",
+		"loop render ./loop.yml",
 		loopIntegrationEnd,
 	} {
 		if !strings.Contains(got, want) {
@@ -759,7 +759,7 @@ func TestUpdateAgentsFileCreatesFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "loop_cli prime") {
+	if !strings.Contains(string(data), "loop prime") {
 		t.Fatalf("file missing loop instructions: %q", string(data))
 	}
 }

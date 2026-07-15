@@ -1,48 +1,64 @@
-# loop_cli
+# loop
 
-`loop_cli` validates a YAML file, packages it as an OCI artifact, and uploads it
+`loop` validates a YAML file, packages it as an OCI artifact, and uploads it
 to a Docker-compatible package registry.
+
+## Install
+
+Install the latest GitHub release for your platform and architecture:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/stumpyfr/loop/main/install.sh | sh
+```
+
+The installer downloads the matching `loop` binary from the latest release
+and installs it to `/usr/local/bin` by default. Override the destination with
+`INSTALL_DIR`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/stumpyfr/loop/main/install.sh | INSTALL_DIR="$HOME/.local/bin" sh
+```
 
 ## Usage
 
 ```bash
-go run . push ./package.yml ghcr.io/github-owner/repo-name/package-name:latest
-go run . init
-go run . validate ./package.yml
-go run . render ./package.yml
-go run . pull ghcr.io/github-owner/repo-name/package-name:latest
-go run . run ghcr.io/github-owner/repo-name/package-name:latest
-go run . quickstart
-go run . prime
+loop push ./package.yml ghcr.io/github-owner/repo-name/package-name:latest
+loop init
+loop validate ./package.yml
+loop render ./package.yml
+loop pull ghcr.io/github-owner/repo-name/package-name:latest
+loop run ghcr.io/github-owner/repo-name/package-name:latest
+loop quickstart
+loop prime
 ```
 
 Initialize agent instructions by creating or updating a managed `AGENTS.md`
-block that points agents to `loop_cli prime`:
+block that points agents to `loop prime`:
 
 ```bash
-go run . init
+loop init
 ```
 
 Validate checks YAML syntax, duplicate mapping keys, and the embedded loop JSON
 Schema:
 
 ```bash
-go run . validate ./package.yml
+loop validate ./package.yml
 ```
 
 Render displays phases, transitions, self-loops, and root escalation inputs as a
 terminal flowchart:
 
 ```bash
-go run . render ./package.yml
-go run . render --no-color ./package.yml
-go run . render --details ghcr.io/github-owner/repo-name/package-name:latest
+loop render ./package.yml
+loop render --no-color ./package.yml
+loop render --details ghcr.io/github-owner/repo-name/package-name:latest
 ```
 
 Optional flags:
 
 ```bash
-go run . \
+loop \
   push \
   --artifact-type application/vnd.arkham.loop.package.v1+yaml \
   --layer-media-type application/vnd.arkham.loop.package.config.v1+yaml \
@@ -59,21 +75,21 @@ registry/namespace/package_name:tag
 For example, multiple packages can live under the same GitHub repository path:
 
 ```bash
-go run . push ./package-one.yml ghcr.io/arkham-advisory/test-loophub/package-one:latest
-go run . push ./package-two.yml ghcr.io/arkham-advisory/test-loophub/package-two:latest
+loop push ./package-one.yml ghcr.io/arkham-advisory/test-loophub/package-one:latest
+loop push ./package-two.yml ghcr.io/arkham-advisory/test-loophub/package-two:latest
 ```
 
 Pulling stores the packaged YAML in the local cache and prints Docker-like
 status output:
 
 ```bash
-go run . pull ghcr.io/arkham-advisory/test-loophub/package-one:latest
+loop pull ghcr.io/arkham-advisory/test-loophub/package-one:latest
 ```
 
 Use `--output` to also copy it to a file:
 
 ```bash
-go run . pull \
+loop pull \
   --output package-one.yml \
   ghcr.io/arkham-advisory/test-loophub/package-one:latest
 ```
@@ -82,20 +98,20 @@ Running displays the cached YAML. If the package is not cached locally, it is
 pulled first:
 
 ```bash
-go run . run ghcr.io/arkham-advisory/test-loophub/package-one:latest
+loop run ghcr.io/arkham-advisory/test-loophub/package-one:latest
 ```
 
 Quickstart prints a human-friendly getting-started guide:
 
 ```bash
-go run . quickstart
+loop quickstart
 ```
 
 Prime prints agent-facing workflow context for authenticating to the registry,
 pulling packages, and displaying loop YAML:
 
 ```bash
-go run . prime
+loop prime
 ```
 
 This helps an agent handle prompts like:
@@ -123,7 +139,7 @@ environment variables:
 ```bash
 export GHCR_USERNAME=github-user-or-org
 export GHCR_TOKEN=github-token-with-write-packages
-go run . push ./package.yml ghcr.io/github-owner/repo-name/package-name:latest
+loop push ./package.yml ghcr.io/github-owner/repo-name/package-name:latest
 ```
 
 In GitHub Actions, `GITHUB_ACTOR` and `GITHUB_TOKEN` are used automatically when
@@ -144,7 +160,7 @@ Use `--no-color` or `NO_COLOR=1` for plain output, and `--details` for compact
 phase actions, completion, and outputs.
 
 The `init` command takes no positional arguments and creates or updates a
-managed Loop CLI block in `AGENTS.md`. Use `--agents-file <path>` to target a
+managed Loop block in `AGENTS.md`. Use `--agents-file <path>` to target a
 different agent instruction file.
 
 The `pull` command requires one tagged OCI package reference and accepts
@@ -154,7 +170,7 @@ The `run` command requires one tagged OCI package reference and prints the YAML
 to stdout, pulling it first when it is not already cached.
 
 The `help` command takes an optional command name and prints grouped command
-help. Agent-oriented help points agents to `loop_cli prime` before executing a
+help. Agent-oriented help points agents to `loop prime` before executing a
 loop package.
 
 The `quickstart` command takes no arguments and prints instructions that another
