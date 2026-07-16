@@ -1,5 +1,5 @@
-apiVersion: loophub.dev/v1alpha1
-kind: EngineeringLoop
+apiVersion: agent-loops.dev/v1alpha1
+kind: AgentLoop
 
 metadata:
     name: valid_loop

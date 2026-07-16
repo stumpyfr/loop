@@ -1,15 +1,33 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
 	"oras.land/oras-go/v2/registry/remote/credentials"
 )
+
+type artifactRepository interface {
+	Resolve(context.Context, string) (ocispec.Descriptor, error)
+	Fetch(context.Context, ocispec.Descriptor) (io.ReadCloser, error)
+	Push(context.Context, ocispec.Descriptor, io.Reader) error
+	Tag(context.Context, ocispec.Descriptor, string) error
+}
+
+var openRepository = func(opts options) (artifactRepository, string, error) {
+	repo, err := newRemoteRepository(opts)
+	if err != nil {
+		return nil, "", err
+	}
+	return repo, repo.Reference.Reference, nil
+}
 
 func newRemoteRepository(opts options) (*remote.Repository, error) {
 	repo, err := remote.NewRepository(opts.targetRef)

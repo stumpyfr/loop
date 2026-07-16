@@ -9,16 +9,22 @@ func printHelp(stdout io.Writer, topic string) {
 	switch topic {
 	case "":
 		printGeneralHelp(stdout)
-	case "push":
-		printPushHelp(stdout)
-	case "pull":
-		printPullHelp(stdout)
-	case "run":
-		printRunHelp(stdout)
-	case "render":
-		printRenderHelp(stdout)
-	case "validate":
-		printValidateHelp(stdout)
+	case "loop":
+		printLoopHelp(stdout)
+	case "loop render":
+		printLoopRenderHelp(stdout)
+	case "loop validate":
+		printLoopValidateHelp(stdout)
+	case "loop pull":
+		printLoopPullHelp(stdout)
+	case "loop push":
+		printLoopPushHelp(stdout)
+	case "skill":
+		printSkillHelp(stdout)
+	case "skill pull":
+		printSkillPullHelp(stdout)
+	case "skill validate":
+		printSkillValidateHelp(stdout)
 	case "init":
 		printInitHelp(stdout)
 	case "quickstart":
@@ -34,126 +40,117 @@ func printHelp(stdout io.Writer, topic string) {
 }
 
 func printGeneralHelp(stdout io.Writer) {
-	fmt.Fprintln(stdout, "OCI-backed YAML loop packages.")
+	fmt.Fprintln(stdout, "Agent toolkit for OCI-backed loops and skills.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop [command]")
+	fmt.Fprintln(stdout, "  agentkit [command]")
 	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Package Commands:")
-	fmt.Fprintln(stdout, "  push        Package a YAML file and upload it as an OCI artifact")
-	fmt.Fprintln(stdout, "  pull        Pull a loop package into the local cache")
-	fmt.Fprintln(stdout, "  run         Print the loop YAML, pulling it first when needed")
-	fmt.Fprintln(stdout, "  render      Display a loop as a terminal flowchart")
-	fmt.Fprintln(stdout, "  validate    Validate a local loop YAML file")
-	fmt.Fprintln(stdout, "  init        Add loop agent instructions to AGENTS.md")
+	fmt.Fprintln(stdout, "Loop Commands:")
+	fmt.Fprintln(stdout, "  loop push                 Push an Agent Loop YAML artifact")
+	fmt.Fprintln(stdout, "  loop pull                 Pull a loop artifact or collection")
+	fmt.Fprintln(stdout, "  loop render               Display a loop as a terminal flowchart")
+	fmt.Fprintln(stdout, "  loop validate             Validate a local Agent Loop YAML file")
+	fmt.Fprintln(stdout, "  loop collection push      Push a loop collection index")
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, "Skill Commands:")
+	fmt.Fprintln(stdout, "  skill push                Push an Agent Skill directory")
+	fmt.Fprintln(stdout, "  skill pull                Pull a skill artifact or collection")
+	fmt.Fprintln(stdout, "  skill validate            Validate a local Agent Skill directory")
+	fmt.Fprintln(stdout, "  skill collection push     Push a skill collection index")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Agent Commands:")
-	fmt.Fprintln(stdout, "  quickstart  Show a human-oriented getting started guide")
-	fmt.Fprintln(stdout, "  prime       Show AI-optimized workflow context for agents")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Additional Commands:")
-	fmt.Fprintln(stdout, "  help        Help about any command")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Agent Workflow:")
-	fmt.Fprintln(stdout, "  Agents should run `loop prime` before running a loop package.")
-	fmt.Fprintln(stdout, "  It explains registry login, `spec.inputs`, phase sub-agents, and run artifacts.")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Use \"loop help [command]\" for more information about a command.")
+	fmt.Fprintln(stdout, "  quickstart                Show a human-oriented getting started guide")
+	fmt.Fprintln(stdout, "  prime                     Show AI-optimized workflow context for agents")
+	fmt.Fprintln(stdout, "  init                      Add agentkit instructions to AGENTS.md")
+	fmt.Fprintln(stdout, "  help                      Help about any command")
 }
 
-func printPushHelp(stdout io.Writer) {
-	fmt.Fprintln(stdout, "Package a YAML file and upload it as an OCI artifact.")
+func printLoopHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Manage Agent Loop OCI artifacts.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop push [flags] <local.yml> <registry/namespace/package_name:tag>")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Examples:")
-	fmt.Fprintln(stdout, "  loop push ./loop.yml ghcr.io/owner/repo/package:0.1.0")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Flags:")
-	fmt.Fprintln(stdout, "  -artifact-type string      OCI artifact type for the package manifest")
-	fmt.Fprintln(stdout, "  -layer-media-type string   OCI media type for the YAML layer")
+	fmt.Fprintln(stdout, "  agentkit loop <push|pull|render|validate|collection>")
 }
 
-func printPullHelp(stdout io.Writer) {
-	fmt.Fprintln(stdout, "Pull a loop package into the local cache.")
+func printLoopPushHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Push an Agent Loop YAML file as an OCI artifact.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop pull [flags] <registry/namespace/package_name:tag>")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Flags:")
-	fmt.Fprintln(stdout, "  -layer-media-type string   OCI media type for the YAML layer")
-	fmt.Fprintln(stdout, "  -output string             also copy pulled YAML to a file")
+	fmt.Fprintln(stdout, "  agentkit loop push <loop.yml> <registry/namespace/package:tag>")
 }
 
-func printRunHelp(stdout io.Writer) {
-	fmt.Fprintln(stdout, "Print the loop YAML, pulling it first when needed.")
+func printLoopPullHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Pull an Agent Loop artifact or loop collection into the agentkit root.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop run [flags] <registry/namespace/package_name:tag>")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Agent Note:")
-	fmt.Fprintln(stdout, "  Run `loop prime` first when an agent is asked to execute a loop.")
-	fmt.Fprintln(stdout, "  The prime context explains how to collect `spec.inputs` and orchestrate phases.")
+	fmt.Fprintln(stdout, "  agentkit loop pull [flags] <registry/namespace/package:tag>")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Flags:")
-	fmt.Fprintln(stdout, "  -layer-media-type string   OCI media type for the YAML layer")
+	fmt.Fprintln(stdout, "  -agents-dir string   agentkit root (default \".agents\")")
 }
 
-func printRenderHelp(stdout io.Writer) {
+func printLoopRenderHelp(stdout io.Writer) {
 	fmt.Fprintln(stdout, "Display a loop as a terminal flowchart.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop render [flags] <local.yml|registry/namespace/package_name:tag>")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "The command shows phases, transitions, self-loops, and root escalation inputs.")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Flags:")
-	fmt.Fprintln(stdout, "  -details                  include compact phase actions, completion, and output summaries")
-	fmt.Fprintln(stdout, "  -layer-media-type string   OCI media type for the YAML layer")
-	fmt.Fprintln(stdout, "  -no-color                 disable ANSI color output")
+	fmt.Fprintln(stdout, "  agentkit loop render [flags] <local.yml|registry/namespace/package:tag>")
 }
 
-func printValidateHelp(stdout io.Writer) {
-	fmt.Fprintln(stdout, "Validate a local loop YAML file.")
+func printLoopValidateHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Validate a local Agent Loop YAML file.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop validate <local.yml>")
+	fmt.Fprintln(stdout, "  agentkit loop validate <loop.yml>")
+}
+
+func printSkillHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Manage Agent Skill OCI artifacts.")
 	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "The command checks YAML syntax, duplicate mapping keys, and the embedded loop JSON Schema.")
+	fmt.Fprintln(stdout, "Usage:")
+	fmt.Fprintln(stdout, "  agentkit skill <push|pull|validate|collection>")
+}
+
+func printSkillPullHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Pull an Agent Skill artifact or skill collection into the agentkit root.")
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, "Usage:")
+	fmt.Fprintln(stdout, "  agentkit skill pull [flags] <registry/namespace/package:tag>")
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, "Flags:")
+	fmt.Fprintln(stdout, "  -agents-dir string   agentkit root (default \".agents\")")
+}
+
+func printSkillValidateHelp(stdout io.Writer) {
+	fmt.Fprintln(stdout, "Validate a local Agent Skill directory.")
+	fmt.Fprintln(stdout)
+	fmt.Fprintln(stdout, "Usage:")
+	fmt.Fprintln(stdout, "  agentkit skill validate <skill-dir>")
 }
 
 func printInitHelp(stdout io.Writer) {
-	fmt.Fprintln(stdout, "Add loop agent instructions to AGENTS.md.")
+	fmt.Fprintln(stdout, "Add agentkit agent instructions to AGENTS.md.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop init [flags]")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "The command creates or updates a managed AGENTS.md block that points agents to `loop prime`.")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Flags:")
-	fmt.Fprintln(stdout, "  -agents-file string   path to the agent instruction file to update (default \"AGENTS.md\")")
+	fmt.Fprintln(stdout, "  agentkit init [flags]")
 }
 
 func printQuickstartHelp(stdout io.Writer) {
 	fmt.Fprintln(stdout, "Show a human-oriented getting started guide.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop quickstart")
+	fmt.Fprintln(stdout, "  agentkit quickstart")
 }
 
 func printPrimeHelp(stdout io.Writer) {
 	fmt.Fprintln(stdout, "Show AI-optimized workflow context for agents.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop prime")
-	fmt.Fprintln(stdout)
-	fmt.Fprintln(stdout, "Use this before an agent runs a loop package. It covers authentication, `spec.inputs`, sub-agent phase execution, and `.loop/runs` artifacts.")
+	fmt.Fprintln(stdout, "  agentkit prime")
 }
 
 func printHelpHelp(stdout io.Writer) {
 	fmt.Fprintln(stdout, "Help about any command.")
 	fmt.Fprintln(stdout)
 	fmt.Fprintln(stdout, "Usage:")
-	fmt.Fprintln(stdout, "  loop help [command]")
+	fmt.Fprintln(stdout, "  agentkit help [topic]")
 }

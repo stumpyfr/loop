@@ -41,17 +41,17 @@ jobs:
           printf "coverage %.1f%% meets required 80.0%%\n" "$coverage"
 
       - name: Build binary
-        run: go build -trimpath -o /tmp/loop ./src
+        run: go build -trimpath -o /tmp/agentkit ./src
 
       - name: Validate bundled loop fixture
         run: |
-          go run ./src validate src/testdata/valid_loop.yml
-          NO_COLOR=1 go run ./src render --details src/testdata/valid_loop.yml >/tmp/valid_loop.rendered.txt
+          go run ./src loop validate src/testdata/valid_loop.yml
+          NO_COLOR=1 go run ./src loop render --details src/testdata/valid_loop.yml >/tmp/valid_loop.rendered.txt
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
         with:
-          name: loop-coverage
+          name: agentkit-coverage
           path: coverage.out
           if-no-files-found: error
 
@@ -98,7 +98,7 @@ jobs:
           build-mode: manual
 
       - name: Build for CodeQL
-        run: go build -o /tmp/codeql-loop ./src
+        run: go build -o /tmp/codeql-agentkit ./src
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

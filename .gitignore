@@ -1,5 +1,6 @@
 # Local Go build output.
 loop
+agentkit
 
 # Coverage files produced by local and CI test runs.
 coverage.out

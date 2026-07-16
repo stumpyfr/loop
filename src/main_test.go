@@ -15,7 +15,7 @@ import (
 
 func TestParseOptionsRequiresPushLocalAndTarget(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"push", "package.yml", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "push", "package.yml", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
@@ -32,11 +32,11 @@ func TestParseOptionsRequiresPushLocalAndTarget(t *testing.T) {
 
 func TestParseOptionsSupportsPullTarget(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"pull", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "pull", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
-	if opts.command != "pull" {
+	if opts.command != "loop pull" {
 		t.Fatalf("command = %q", opts.command)
 	}
 	if opts.targetRef != "ghcr.io/owner/repo/package-one:v1" {
@@ -47,24 +47,24 @@ func TestParseOptionsSupportsPullTarget(t *testing.T) {
 	}
 }
 
-func TestParseOptionsSupportsPullOutput(t *testing.T) {
+func TestParseOptionsSupportsPullAgentsDir(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"pull", "--output", "pulled.yml", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "pull", "--agents-dir", "custom-agents", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
-	if opts.output != "pulled.yml" {
-		t.Fatalf("output = %q", opts.output)
+	if opts.agentsDir != "custom-agents" {
+		t.Fatalf("agentsDir = %q", opts.agentsDir)
 	}
 }
 
 func TestParseOptionsSupportsRunTarget(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"run", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "pull", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
-	if opts.command != "run" {
+	if opts.command != "loop pull" {
 		t.Fatalf("command = %q", opts.command)
 	}
 	if opts.targetRef != "ghcr.io/owner/repo/package-one:v1" {
@@ -77,11 +77,11 @@ func TestParseOptionsSupportsRunTarget(t *testing.T) {
 
 func TestParseOptionsSupportsRenderLocalFilename(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"render", "--no-color", "--details", "loop.yml"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "render", "--no-color", "--details", "loop.yml"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
-	if opts.command != "render" {
+	if opts.command != "loop render" {
 		t.Fatalf("command = %q", opts.command)
 	}
 	if opts.filename != "loop.yml" {
@@ -97,11 +97,11 @@ func TestParseOptionsSupportsRenderLocalFilename(t *testing.T) {
 
 func TestParseOptionsSupportsRenderOCITarget(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"render", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "render", "ghcr.io/Owner/Repo/package-one:v1"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
-	if opts.command != "render" {
+	if opts.command != "loop render" {
 		t.Fatalf("command = %q", opts.command)
 	}
 	if opts.targetRef != "ghcr.io/owner/repo/package-one:v1" {
@@ -111,11 +111,11 @@ func TestParseOptionsSupportsRenderOCITarget(t *testing.T) {
 
 func TestParseOptionsSupportsValidateFilename(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"validate", "loop.yml"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "validate", "loop.yml"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
-	if opts.command != "validate" {
+	if opts.command != "loop validate" {
 		t.Fatalf("command = %q", opts.command)
 	}
 	if opts.filename != "loop.yml" {
@@ -172,14 +172,14 @@ func TestParseOptionsSupportsPrime(t *testing.T) {
 
 func TestParseOptionsSupportsHelp(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"help", "run"}, &stderr)
+	opts, err := parseOptions([]string{"help", "loop", "render"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
 	if opts.command != "help" {
 		t.Fatalf("command = %q", opts.command)
 	}
-	if opts.helpTopic != "run" {
+	if opts.helpTopic != "loop render" {
 		t.Fatalf("helpTopic = %q", opts.helpTopic)
 	}
 }
@@ -197,18 +197,75 @@ func TestParseOptionsSupportsGlobalHelpFlag(t *testing.T) {
 
 func TestParseOptionsSupportsCommandHelpFlag(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"run", "--help"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "render", "--help"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
 	if opts.command != "help" {
 		t.Fatalf("command = %q", opts.command)
 	}
-	if opts.helpTopic != "run" {
+	if opts.helpTopic != "loop render" {
 		t.Fatalf("helpTopic = %q", opts.helpTopic)
 	}
 	if stderr.Len() != 0 {
 		t.Fatalf("stderr = %q", stderr.String())
+	}
+}
+
+func TestParseOptionsSupportsSkillCommands(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    []string
+		command string
+	}{
+		{name: "push", args: []string{"skill", "push", "skill-dir", "ghcr.io/Owner/Repo/skill:v1"}, command: "skill push"},
+		{name: "pull", args: []string{"skill", "pull", "--agents-dir", "custom", "ghcr.io/Owner/Repo/skill:v1"}, command: "skill pull"},
+		{name: "validate", args: []string{"skill", "validate", "skill-dir"}, command: "skill validate"},
+		{name: "collection", args: []string{"skill", "collection", "push", "skills.json", "ghcr.io/Owner/Repo/skills:v1"}, command: "skill collection push"},
+		{name: "loop collection", args: []string{"loop", "collection", "push", "loops.json", "ghcr.io/Owner/Repo/loops:v1"}, command: "loop collection push"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stderr bytes.Buffer
+			opts, err := parseOptions(tt.args, &stderr)
+			if err != nil {
+				t.Fatalf("parseOptions returned error: %v", err)
+			}
+			if opts.command != tt.command {
+				t.Fatalf("command = %q, want %q", opts.command, tt.command)
+			}
+		})
+	}
+}
+
+func TestParseOptionsRejectsLegacyFlatCommands(t *testing.T) {
+	for _, args := range [][]string{
+		{"push", "loop.yml", "ghcr.io/owner/repo/package:v1"},
+		{"pull", "ghcr.io/owner/repo/package:v1"},
+		{"run", "ghcr.io/owner/repo/package:v1"},
+		{"render", "loop.yml"},
+		{"validate", "loop.yml"},
+	} {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			var stderr bytes.Buffer
+			if _, err := parseOptions(args, &stderr); err == nil {
+				t.Fatal("expected legacy command error")
+			}
+		})
+	}
+}
+
+func TestParseOptionsRejectsTypedInstallCommands(t *testing.T) {
+	for _, args := range [][]string{
+		{"loop", "install", "ghcr.io/owner/repo/package:v1"},
+		{"skill", "install", "ghcr.io/owner/repo/skill:v1"},
+	} {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			var stderr bytes.Buffer
+			if _, err := parseOptions(args, &stderr); err == nil {
+				t.Fatal("expected typed install command error")
+			}
+		})
 	}
 }
 
@@ -230,7 +287,7 @@ func TestParseOptionsRejectsPrimeArgs(t *testing.T) {
 
 func TestParseOptionsRejectsHelpTooManyArgs(t *testing.T) {
 	var stderr bytes.Buffer
-	_, err := parseOptions([]string{"help", "run", "pull"}, &stderr)
+	_, err := parseOptions([]string{"help", "loop", "render", "pull"}, &stderr)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -238,7 +295,7 @@ func TestParseOptionsRejectsHelpTooManyArgs(t *testing.T) {
 
 func TestParseOptionsRejectsValidateWithoutFilename(t *testing.T) {
 	var stderr bytes.Buffer
-	_, err := parseOptions([]string{"validate"}, &stderr)
+	_, err := parseOptions([]string{"loop", "validate"}, &stderr)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -246,7 +303,7 @@ func TestParseOptionsRejectsValidateWithoutFilename(t *testing.T) {
 
 func TestParseOptionsRejectsRenderWithoutSource(t *testing.T) {
 	var stderr bytes.Buffer
-	_, err := parseOptions([]string{"render"}, &stderr)
+	_, err := parseOptions([]string{"loop", "render"}, &stderr)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -270,7 +327,7 @@ func TestParseOptionsRejectsUnknownCommand(t *testing.T) {
 
 func TestParseOptionsRejectsTargetWithoutTag(t *testing.T) {
 	var stderr bytes.Buffer
-	_, err := parseOptions([]string{"push", "package.yml", "ghcr.io/owner/repo/package-one"}, &stderr)
+	_, err := parseOptions([]string{"loop", "push", "package.yml", "ghcr.io/owner/repo/package-one"}, &stderr)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -278,7 +335,7 @@ func TestParseOptionsRejectsTargetWithoutTag(t *testing.T) {
 
 func TestParseOptionsRequiresNamespaceAndPackage(t *testing.T) {
 	var stderr bytes.Buffer
-	_, err := parseOptions([]string{"push", "package.yml", "ghcr.io/package-one:v1"}, &stderr)
+	_, err := parseOptions([]string{"loop", "push", "package.yml", "ghcr.io/package-one:v1"}, &stderr)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -286,7 +343,7 @@ func TestParseOptionsRequiresNamespaceAndPackage(t *testing.T) {
 
 func TestParseOptionsSupportsRegistriesWithPorts(t *testing.T) {
 	var stderr bytes.Buffer
-	opts, err := parseOptions([]string{"push", "package.yml", "localhost:5000/Owner/Repo/package-one:v1"}, &stderr)
+	opts, err := parseOptions([]string{"loop", "push", "package.yml", "localhost:5000/Owner/Repo/package-one:v1"}, &stderr)
 	if err != nil {
 		t.Fatalf("parseOptions returned error: %v", err)
 	}
@@ -295,6 +352,49 @@ func TestParseOptionsSupportsRegistriesWithPorts(t *testing.T) {
 	}
 	if opts.targetRef != "localhost:5000/owner/repo/package-one:v1" {
 		t.Fatalf("targetRef = %q", opts.targetRef)
+	}
+}
+
+func TestParseOptionsSupportsPullDigestReference(t *testing.T) {
+	digestRef := "ghcr.io/Owner/Repo/package-one@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	var stderr bytes.Buffer
+	opts, err := parseOptions([]string{"loop", "pull", digestRef}, &stderr)
+	if err != nil {
+		t.Fatalf("parseOptions returned error: %v", err)
+	}
+	want := "ghcr.io/owner/repo/package-one@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	if opts.targetRef != want {
+		t.Fatalf("targetRef = %q, want %q", opts.targetRef, want)
+	}
+	if opts.registry != defaultRegistry {
+		t.Fatalf("registry = %q", opts.registry)
+	}
+}
+
+func TestParseOptionsSupportsPullTagAndDigestReference(t *testing.T) {
+	digestRef := "ghcr.io/Owner/Repo/package-one:Release-1@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	var stderr bytes.Buffer
+	opts, err := parseOptions([]string{"skill", "pull", digestRef}, &stderr)
+	if err != nil {
+		t.Fatalf("parseOptions returned error: %v", err)
+	}
+	want := "ghcr.io/owner/repo/package-one:Release-1@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	if opts.targetRef != want {
+		t.Fatalf("targetRef = %q, want %q", opts.targetRef, want)
+	}
+	if targetTag(opts.targetRef) != "Release-1" {
+		t.Fatalf("targetTag = %q", targetTag(opts.targetRef))
+	}
+	if targetDigest(opts.targetRef) != "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" {
+		t.Fatalf("targetDigest = %q", targetDigest(opts.targetRef))
+	}
+}
+
+func TestParseOptionsRejectsPushDigestReference(t *testing.T) {
+	var stderr bytes.Buffer
+	_, err := parseOptions([]string{"loop", "push", "package.yml", "ghcr.io/owner/repo/package-one@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}, &stderr)
+	if err == nil {
+		t.Fatal("expected push digest reference error")
 	}
 }
 
@@ -311,15 +411,39 @@ func TestNormalizeTargetRefKeepsTagCase(t *testing.T) {
 	}
 }
 
+func TestDependencyOptionsUsesOCIRef(t *testing.T) {
+	opts, err := dependencyOptions(options{agentsDir: ".agents"}, dependencySpec{
+		Name: "python-codescene",
+		Ref:  "ghcr.io/Owner/Repo/skill/python-codescene:0.1.0@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+	})
+	if err != nil {
+		t.Fatalf("dependencyOptions returned error: %v", err)
+	}
+	want := "ghcr.io/owner/repo/skill/python-codescene:0.1.0@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	if opts.targetRef != want {
+		t.Fatalf("targetRef = %q, want %q", opts.targetRef, want)
+	}
+	if opts.registry != defaultRegistry {
+		t.Fatalf("registry = %q", opts.registry)
+	}
+}
+
+func TestDependencyOptionsRequiresRef(t *testing.T) {
+	_, err := dependencyOptions(options{}, dependencySpec{Name: "missing"})
+	if err == nil || !strings.Contains(err.Error(), "must include ref") {
+		t.Fatalf("expected missing ref error, got %v", err)
+	}
+}
+
 func TestGithubSourceURLInfersRepoFromGHCRRef(t *testing.T) {
 	sourceURL, ok := githubSourceURL(options{
 		registry:  defaultRegistry,
-		targetRef: "ghcr.io/arkham-advisory/test-loophub/package-one:latest",
+		targetRef: "ghcr.io/acme/loop-catalog/package-one:latest",
 	})
 	if !ok {
 		t.Fatal("expected source URL")
 	}
-	want := "https://github.com/arkham-advisory/test-loophub"
+	want := "https://github.com/acme/loop-catalog"
 	if sourceURL != want {
 		t.Fatalf("sourceURL = %q, want %q", sourceURL, want)
 	}
@@ -328,7 +452,7 @@ func TestGithubSourceURLInfersRepoFromGHCRRef(t *testing.T) {
 func TestGithubSourceURLIgnoresNonGHCRRefs(t *testing.T) {
 	_, ok := githubSourceURL(options{
 		registry:  "localhost:5000",
-		targetRef: "localhost:5000/arkham-advisory/test-loophub/package-one:latest",
+		targetRef: "localhost:5000/acme/loop-catalog/package-one:latest",
 	})
 	if ok {
 		t.Fatal("expected no source URL")
@@ -338,12 +462,12 @@ func TestGithubSourceURLIgnoresNonGHCRRefs(t *testing.T) {
 func TestManifestAnnotationsUseFixedCreatedTime(t *testing.T) {
 	annotations := manifestAnnotations(options{
 		registry:  defaultRegistry,
-		targetRef: "ghcr.io/arkham-advisory/test-loophub/package-one:latest",
+		targetRef: "ghcr.io/acme/loop-catalog/package-one:latest",
 	})
 	if annotations[ocispec.AnnotationCreated] != fixedCreatedTime {
 		t.Fatalf("created = %q", annotations[ocispec.AnnotationCreated])
 	}
-	wantSource := "https://github.com/arkham-advisory/test-loophub"
+	wantSource := "https://github.com/acme/loop-catalog"
 	if annotations[sourceAnnotation] != wantSource {
 		t.Fatalf("source = %q, want %q", annotations[sourceAnnotation], wantSource)
 	}
@@ -386,6 +510,43 @@ func TestSelectYAMLLayerPrefersConfiguredMediaType(t *testing.T) {
 	}
 	if got.Digest != want.Digest {
 		t.Fatalf("Digest = %q, want %q", got.Digest, want.Digest)
+	}
+}
+
+func TestDescriptorManifestMatchesArtifactTypeFromDescriptor(t *testing.T) {
+	desc := ocispec.Descriptor{ArtifactType: loopArtifactType}
+	manifest := ocispec.Manifest{}
+	if !descriptorManifestMatchesArtifactType(desc, manifest, loopArtifactType) {
+		t.Fatal("expected descriptor artifact type to match")
+	}
+	if got := descriptorManifestArtifactType(desc, manifest); got != loopArtifactType {
+		t.Fatalf("artifact type = %q, want %q", got, loopArtifactType)
+	}
+}
+
+func TestDescriptorManifestMatchesArtifactTypeFromConfig(t *testing.T) {
+	desc := ocispec.Descriptor{}
+	manifest := ocispec.Manifest{
+		Config: ocispec.Descriptor{MediaType: loopArtifactType},
+	}
+	if !descriptorManifestMatchesArtifactType(desc, manifest, loopArtifactType) {
+		t.Fatal("expected config media type to match")
+	}
+	if got := descriptorManifestArtifactType(desc, manifest); got != loopArtifactType {
+		t.Fatalf("artifact type = %q, want %q", got, loopArtifactType)
+	}
+}
+
+func TestDescriptorManifestMatchesArtifactTypeFromLayerFallback(t *testing.T) {
+	desc := ocispec.Descriptor{}
+	manifest := ocispec.Manifest{
+		Layers: []ocispec.Descriptor{{MediaType: loopLayerType}},
+	}
+	if !descriptorManifestMatchesArtifactType(desc, manifest, loopArtifactType) {
+		t.Fatal("expected loop layer fallback to match")
+	}
+	if descriptorManifestMatchesArtifactType(desc, manifest, skillArtifactType) {
+		t.Fatal("did not expect loop layer fallback to match skill artifact type")
 	}
 }
 
@@ -466,18 +627,40 @@ func TestPrintQuickstartProvidesHumanIntro(t *testing.T) {
 	printQuickstart(&stdout, options{})
 	got := stdout.String()
 	for _, want := range []string{
-		"loop - OCI-backed YAML loop packages",
+		"agentkit",
 		"GETTING STARTED",
-		"loop init",
-		"loop validate ./loop.yml",
-		"loop render ./loop.yml",
-		"loop push ./loop.yml ghcr.io/owner/repo/package:tag",
+		"agentkit init",
+		"agentkit loop validate ./loop.yml",
+		"agentkit loop render ./loop.yml",
+		"agentkit loop push ./loop.yml ghcr.io/owner/repo/package:tag",
 		"docker login ghcr.io",
-		"Run `loop prime` for agent-oriented workflow instructions.",
+		"Run `agentkit prime` for agent-oriented workflow instructions.",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
 		}
+	}
+}
+
+func TestPrintInstallResultPreservesTraversalOrder(t *testing.T) {
+	var stdout bytes.Buffer
+	result := installResult{
+		Installed: []installRecord{
+			{Kind: "skill", Name: "python-codescene", Path: ".agents/skills/python-codescene/0.1.0", Level: 1},
+		},
+		Skipped: []installRecord{
+			{Kind: "loop", Name: "test", Path: ".agents/loops/test/0.1.0/loop.yml"},
+		},
+		Events: []installEvent{
+			{Record: installRecord{Kind: "loop", Name: "test", Path: ".agents/loops/test/0.1.0/loop.yml"}, Skipped: true},
+			{Record: installRecord{Kind: "skill", Name: "python-codescene", Path: ".agents/skills/python-codescene/0.1.0", Level: 1}},
+		},
+	}
+	printInstallResult(&stdout, result)
+	got := stdout.String()
+	want := "already up to date loop test -> .agents/loops/test/0.1.0/loop.yml\n  installed skill python-codescene -> .agents/skills/python-codescene/0.1.0\n"
+	if got != want {
+		t.Fatalf("output = %q, want %q", got, want)
 	}
 }
 
@@ -497,10 +680,18 @@ func TestPrintPrimeProvidesAgentDocs(t *testing.T) {
 		"Do not review, implement, or change the codebase yourself",
 		"Add a `summary` section to the final report containing `status`, `objective`, `outcome`, and `duration_in_seconds`.",
 		"Ensure each phase report contains only outputs defined by that phase",
+		"Dependency Skills",
+		"do not pull dependency skills separately during execution",
+		"`.agents/agentkit.lock.json`",
+		"`.agents/loops/<loop-name>/<version>/loop.yml`",
+		"`.agents/skills/<skill-name>/<version>/`",
+		"compatibility copy at `.agents/loops/<loop-name>/loop.yml`",
+		"compatibility copy at `.agents/skills/<skill-name>/`",
+		"locked skill paths",
 		"`registry/namespace/package_name:tag`",
-		"`loop pull ghcr.io/owner/repo/package:tag`",
-		"`loop run ghcr.io/owner/repo/package:tag`",
-		"treat that YAML as the execution instructions",
+		"`agentkit loop pull ghcr.io/owner/repo/package:tag`",
+		"`agentkit loop render ghcr.io/owner/repo/package:tag`",
+		"inspect the loop structure before execution",
 		"Inspect `spec.inputs` before starting the loop.",
 		"Ask the user for any missing required input values before running phases.",
 		"Do not invent missing input values.",
@@ -529,14 +720,13 @@ func TestPrintHelpGuidesAgentsToPrime(t *testing.T) {
 	got := stdout.String()
 	for _, want := range []string{
 		"Usage:",
-		"Package Commands:",
-		"render      Display a loop as a terminal flowchart",
-		"validate    Validate a local loop YAML file",
-		"init        Add loop agent instructions to AGENTS.md",
+		"Loop Commands:",
+		"loop render",
+		"loop validate",
+		"init",
 		"Agent Commands:",
-		"prime       Show AI-optimized workflow context for agents",
-		"Agents should run `loop prime` before running a loop package.",
-		"Use \"loop help [command]\" for more information about a command.",
+		"prime",
+		"agentkit [command]",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -546,14 +736,11 @@ func TestPrintHelpGuidesAgentsToPrime(t *testing.T) {
 
 func TestPrintRenderHelp(t *testing.T) {
 	var stdout bytes.Buffer
-	printHelp(&stdout, "render")
+	printHelp(&stdout, "loop render")
 	got := stdout.String()
 	for _, want := range []string{
 		"Display a loop as a terminal flowchart.",
-		"loop render [flags] <local.yml|registry/namespace/package_name:tag>",
-		"phases, transitions, self-loops, and root escalation inputs",
-		"-details",
-		"-no-color",
+		"agentkit loop render [flags] <local.yml|registry/namespace/package:tag>",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -563,12 +750,11 @@ func TestPrintRenderHelp(t *testing.T) {
 
 func TestPrintValidateHelp(t *testing.T) {
 	var stdout bytes.Buffer
-	printHelp(&stdout, "validate")
+	printHelp(&stdout, "loop validate")
 	got := stdout.String()
 	for _, want := range []string{
-		"Validate a local loop YAML file.",
-		"loop validate <local.yml>",
-		"embedded loop JSON Schema",
+		"Validate a local Agent Loop YAML file.",
+		"agentkit loop validate <loop.yml>",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -581,10 +767,8 @@ func TestPrintInitHelp(t *testing.T) {
 	printHelp(&stdout, "init")
 	got := stdout.String()
 	for _, want := range []string{
-		"Add loop agent instructions to AGENTS.md.",
-		"loop init [flags]",
-		"points agents to `loop prime`",
-		"-agents-file string",
+		"Add agentkit agent instructions to AGENTS.md.",
+		"agentkit init [flags]",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -592,15 +776,14 @@ func TestPrintInitHelp(t *testing.T) {
 	}
 }
 
-func TestPrintRunHelpGuidesAgentsToPrime(t *testing.T) {
+func TestPrintLoopPullHelp(t *testing.T) {
 	var stdout bytes.Buffer
-	printHelp(&stdout, "run")
+	printHelp(&stdout, "loop pull")
 	got := stdout.String()
 	for _, want := range []string{
 		"Usage:",
-		"loop run [flags] <registry/namespace/package_name:tag>",
-		"Agent Note:",
-		"Run `loop prime` first when an agent is asked to execute a loop.",
+		"agentkit loop pull [flags] <registry/namespace/package:tag>",
+		"-agents-dir",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in %q", want, got)
@@ -697,10 +880,10 @@ func TestUpdateAgentsContentAppendsManagedBlock(t *testing.T) {
 	}
 	for _, want := range []string{
 		"# Agent Instructions",
-		loopIntegrationBegin,
-		"Run `loop prime` before executing a loop package.",
-		"loop render ./loop.yml",
-		loopIntegrationEnd,
+		agentkitIntegrationBegin,
+		"Run `agentkit prime` before executing an Agent Loop artifact.",
+		"agentkit loop render ./loop.yml",
+		agentkitIntegrationEnd,
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("content missing %q in %q", want, got)
@@ -709,7 +892,7 @@ func TestUpdateAgentsContentAppendsManagedBlock(t *testing.T) {
 }
 
 func TestUpdateAgentsContentReplacesManagedBlock(t *testing.T) {
-	old := "# Agent Instructions\n\n" + loopIntegrationBegin + "\nold content\n" + loopIntegrationEnd + "\n"
+	old := "# Agent Instructions\n\n" + agentkitIntegrationBegin + "\nold content\n" + agentkitIntegrationEnd + "\n"
 	got, changed, err := updateAgentsContent(old)
 	if err != nil {
 		t.Fatalf("updateAgentsContent returned error: %v", err)
@@ -720,13 +903,13 @@ func TestUpdateAgentsContentReplacesManagedBlock(t *testing.T) {
 	if strings.Contains(got, "old content") {
 		t.Fatalf("old block was not replaced: %q", got)
 	}
-	if strings.Count(got, loopIntegrationBegin) != 1 {
+	if strings.Count(got, agentkitIntegrationBegin) != 1 {
 		t.Fatalf("expected one begin marker in %q", got)
 	}
 }
 
 func TestUpdateAgentsContentIsIdempotent(t *testing.T) {
-	current := loopAgentsBlock() + "\n"
+	current := agentkitAgentsBlock() + "\n"
 	got, changed, err := updateAgentsContent(current)
 	if err != nil {
 		t.Fatalf("updateAgentsContent returned error: %v", err)
@@ -740,7 +923,7 @@ func TestUpdateAgentsContentIsIdempotent(t *testing.T) {
 }
 
 func TestUpdateAgentsContentRejectsPartialManagedBlock(t *testing.T) {
-	_, _, err := updateAgentsContent(loopIntegrationBegin + "\n")
+	_, _, err := updateAgentsContent(agentkitIntegrationBegin + "\n")
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -759,14 +942,14 @@ func TestUpdateAgentsFileCreatesFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "loop prime") {
-		t.Fatalf("file missing loop instructions: %q", string(data))
+	if !strings.Contains(string(data), "agentkit prime") {
+		t.Fatalf("file missing agentkit instructions: %q", string(data))
 	}
 }
 
 func TestUpdateAgentsFileReportsUpdatedWhenAlreadyInstalled(t *testing.T) {
 	filename := filepath.Join(t.TempDir(), "AGENTS.md")
-	if err := os.WriteFile(filename, []byte(loopAgentsBlock()+"\n"), 0o600); err != nil {
+	if err := os.WriteFile(filename, []byte(agentkitAgentsBlock()+"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	action, err := updateAgentsFile(filename)
@@ -868,8 +1051,8 @@ func TestValidateLoopFileRejectsSchemaViolation(t *testing.T) {
 	dir := t.TempDir()
 	filename := filepath.Join(dir, "loop.yml")
 	if err := os.WriteFile(filename, []byte(`
-apiVersion: loophub.dev/v1alpha1
-kind: EngineeringLoop
+apiVersion: agent-loops.dev/v1alpha1
+kind: AgentLoop
 metadata:
   name: demo
   version: 0.1.0
@@ -918,8 +1101,8 @@ func TestValidateYAMLFileRequiresYAMLExtension(t *testing.T) {
 }
 
 const validLoopYAML = `
-apiVersion: loophub.dev/v1alpha1
-kind: EngineeringLoop
+apiVersion: agent-loops.dev/v1alpha1
+kind: AgentLoop
 metadata:
   name: demo
   version: 0.1.0
@@ -944,7 +1127,7 @@ phases:
       - status: ["completed", "blocked", "escalated"]
       - summary: string
     transitions:
-      - to: publish
+      - to: push
         condition: Continue when complete.
 escalation:
   principle: Escalate only when needed.

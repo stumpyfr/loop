@@ -26,8 +26,9 @@ type loopMetadata struct {
 }
 
 type loopSpec struct {
-	Objective string               `yaml:"objective"`
-	Inputs    map[string]loopInput `yaml:"inputs"`
+	Objective    string               `yaml:"objective"`
+	Inputs       map[string]loopInput `yaml:"inputs"`
+	Dependencies loopDependencySet    `yaml:"dependencies"`
 }
 
 type loopInput struct {

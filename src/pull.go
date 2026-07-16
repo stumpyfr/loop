@@ -13,12 +13,12 @@ import (
 )
 
 func pullPackage(ctx context.Context, opts options) (pullResult, error) {
-	repo, err := newRemoteRepository(opts)
+	repo, reference, err := openRepository(opts)
 	if err != nil {
 		return pullResult{}, err
 	}
 
-	manifest, err := repo.Resolve(ctx, repo.Reference.Reference)
+	manifest, err := repo.Resolve(ctx, reference)
 	if err != nil {
 		return pullResult{}, wrapPullError(opts.registry, fmt.Errorf("resolve package: %w", err))
 	}
@@ -94,7 +94,7 @@ func runPackage(ctx context.Context, opts options, stdout io.Writer) error {
 }
 
 func printPullResult(stdout io.Writer, result pullResult) {
-	fmt.Fprintf(stdout, "%s: Pulling from %s\n", targetTag(result.ref), targetRepository(result.ref))
+	fmt.Fprintf(stdout, "%s: Pulling from %s\n", targetDisplayReference(result.ref), targetRepository(result.ref))
 	fmt.Fprintf(stdout, "Digest: %s\n", result.manifestDigest)
 	if result.updated {
 		fmt.Fprintf(stdout, "Status: Downloaded newer image for %s\n", result.ref)
@@ -102,6 +102,16 @@ func printPullResult(stdout io.Writer, result pullResult) {
 		fmt.Fprintf(stdout, "Status: Image is up to date for %s\n", result.ref)
 	}
 	fmt.Fprintln(stdout, result.ref)
+}
+
+func targetDisplayReference(ref string) string {
+	if tag := targetTag(ref); tag != "" {
+		return tag
+	}
+	if digest := targetDigest(ref); digest != "" {
+		return digest
+	}
+	return "latest"
 }
 
 func selectYAMLLayer(descs []ocispec.Descriptor, layerType string) (ocispec.Descriptor, error) {

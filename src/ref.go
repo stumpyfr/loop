@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/opencontainers/go-digest"
+	"oras.land/oras-go/v2/registry"
 )
 
 func normalizeTargetRef(ref string) (string, string, error) {
@@ -13,45 +16,71 @@ func normalizeTargetRef(ref string) (string, string, error) {
 		return "", "", fmt.Errorf("target reference contains whitespace: %q", ref)
 	}
 
-	firstSlash := strings.Index(ref, "/")
-	if firstSlash <= 0 || firstSlash == len(ref)-1 {
-		return "", "", fmt.Errorf("target reference must look like registry/namespace/package_name:tag, got %q", ref)
+	name, tag, digestRef, err := splitOCIReference(ref)
+	if err != nil {
+		return "", "", err
+	}
+	if tag == "" && digestRef == "" {
+		return "", "", fmt.Errorf("target reference must include an explicit tag or digest, got %q", ref)
 	}
 
-	lastSlash := strings.LastIndex(ref, "/")
-	if lastSlash == firstSlash {
+	normalized := strings.ToLower(name)
+	if tag != "" {
+		if err := (registry.Reference{Reference: tag}).ValidateReferenceAsTag(); err != nil {
+			return "", "", fmt.Errorf("target reference tag is invalid: %q", ref)
+		}
+		normalized += ":" + tag
+	}
+	if digestRef != "" {
+		parsed, err := digest.Parse(digestRef)
+		if err != nil {
+			return "", "", fmt.Errorf("target reference digest is invalid: %q", ref)
+		}
+		normalized += "@" + parsed.String()
+	}
+	parsed, err := registry.ParseReference(normalized)
+	if err != nil {
+		return "", "", fmt.Errorf("target reference is not a valid OCI reference: %q: %w", ref, err)
+	}
+	if parsed.Reference == "" {
+		return "", "", fmt.Errorf("target reference must include an explicit tag or digest, got %q", ref)
+	}
+	if !strings.Contains(parsed.Repository, "/") {
 		return "", "", fmt.Errorf("target reference must include a namespace and package name, got %q", ref)
 	}
-	lastColon := strings.LastIndex(ref, ":")
-	if lastColon <= lastSlash || lastColon == len(ref)-1 {
-		return "", "", fmt.Errorf("target reference must include an explicit tag, got %q", ref)
-	}
+	return normalized, strings.ToLower(parsed.Registry), nil
+}
 
-	name := ref[:lastColon]
-	tag := ref[lastColon+1:]
-	if strings.Contains(tag, "/") {
-		return "", "", fmt.Errorf("target reference tag is invalid: %q", ref)
-	}
-	for _, part := range strings.Split(name, "/") {
-		if part == "" {
-			return "", "", fmt.Errorf("target reference contains empty path components: %q", ref)
+func splitOCIReference(ref string) (name string, tag string, digestRef string, err error) {
+	nameTag := ref
+	if at := strings.LastIndex(ref, "@"); at >= 0 {
+		if at == len(ref)-1 {
+			return "", "", "", fmt.Errorf("target reference digest is empty: %q", ref)
 		}
+		nameTag = ref[:at]
+		digestRef = ref[at+1:]
 	}
-	for _, part := range strings.Split(name[firstSlash+1:], "/") {
-		if strings.Contains(part, ":") {
-			return "", "", fmt.Errorf("target reference path contains invalid ':' character: %q", ref)
+	lastSlash := strings.LastIndex(nameTag, "/")
+	lastColon := strings.LastIndex(nameTag, ":")
+	name = nameTag
+	if lastColon > lastSlash {
+		if lastColon == len(nameTag)-1 {
+			return "", "", "", fmt.Errorf("target reference tag is empty: %q", ref)
 		}
+		name = nameTag[:lastColon]
+		tag = nameTag[lastColon+1:]
 	}
-
-	return strings.ToLower(name) + ":" + tag, strings.ToLower(ref[:firstSlash]), nil
+	return name, tag, digestRef, nil
 }
 
 func targetName(ref string) string {
-	lastColon := strings.LastIndex(ref, ":")
-	if lastColon == -1 {
-		return ref
+	nameTag := refWithoutDigest(ref)
+	lastSlash := strings.LastIndex(nameTag, "/")
+	lastColon := strings.LastIndex(nameTag, ":")
+	if lastColon > lastSlash {
+		return nameTag[:lastColon]
 	}
-	return ref[:lastColon]
+	return nameTag
 }
 
 func targetRepository(ref string) string {
@@ -64,9 +93,25 @@ func targetRepository(ref string) string {
 }
 
 func targetTag(ref string) string {
-	lastColon := strings.LastIndex(ref, ":")
-	if lastColon == -1 || lastColon == len(ref)-1 {
+	nameTag := refWithoutDigest(ref)
+	lastSlash := strings.LastIndex(nameTag, "/")
+	lastColon := strings.LastIndex(nameTag, ":")
+	if lastColon <= lastSlash || lastColon == len(nameTag)-1 {
 		return ""
 	}
-	return ref[lastColon+1:]
+	return nameTag[lastColon+1:]
+}
+
+func targetDigest(ref string) string {
+	if at := strings.LastIndex(ref, "@"); at >= 0 && at < len(ref)-1 {
+		return ref[at+1:]
+	}
+	return ""
+}
+
+func refWithoutDigest(ref string) string {
+	if at := strings.LastIndex(ref, "@"); at >= 0 {
+		return ref[:at]
+	}
+	return ref
 }
