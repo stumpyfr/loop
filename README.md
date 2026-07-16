@@ -3,6 +3,8 @@
 `agentkit` pushes, pulls, validates, and inspects OCI-backed Agent Loops
 and Agent Skills.
 
+![Agentkit installs versioned loop collections and shared skills across an organization.](docs/assets/agentkit-overview.jpg)
+
 ## Install
 
 Install the latest GitHub release for your platform and architecture:
