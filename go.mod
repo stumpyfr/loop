@@ -1,4 +1,4 @@
-module github.com/stumpyfr/loop
+module github.com/stumpyfr/agentkit
 
 go 1.26.5
 

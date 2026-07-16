@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://loophub.dev/schemas/loop.v1alpha1.schema.json",
+  "$id": "https://agent-loops.dev/schemas/loop.v1alpha1.schema.json",
   "title": "Loop",
   "type": "object",
   "additionalProperties": false,
   "required": ["apiVersion", "kind", "metadata", "spec", "phases"],
   "properties": {
-    "apiVersion": { "const": "loophub.dev/v1alpha1" },
-    "kind": { "const": "EngineeringLoop" },
+    "apiVersion": { "const": "agent-loops.dev/v1alpha1" },
+    "kind": { "const": "AgentLoop" },
     "metadata": { "$ref": "#/$defs/metadata" },
     "spec": { "$ref": "#/$defs/spec" },
     "phases": {
@@ -39,7 +39,42 @@
           "type": "object",
           "minProperties": 1,
           "additionalProperties": { "$ref": "#/$defs/input" }
+        },
+        "dependencies": { "$ref": "#/$defs/dependencies" }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["loops"] },
+        { "required": ["skills"] }
+      ],
+      "properties": {
+        "loops": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/dependency" }
+        },
+        "skills": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/dependency" }
         }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "ref"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "ref": {
+          "type": "string",
+          "pattern": "^[^\\s/@]+/[^\\s@]+(?:(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127})|(?:@[A-Za-z][A-Za-z0-9_+.-]*:[A-Za-z0-9=_-]+)|(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}@[A-Za-z][A-Za-z0-9_+.-]*:[A-Za-z0-9=_-]+))$"
+        },
+        "required": { "type": "boolean" },
+        "description": { "type": "string", "minLength": 1 }
       }
     },
     "input": {

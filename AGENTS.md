@@ -1,22 +1,24 @@
-<!-- BEGIN LOOP INTEGRATION v:1 -->
-## Loop
+<!-- BEGIN AGENTKIT INTEGRATION v:1 -->
+## Agentkit
 
-This project uses **loop** for OCI-backed YAML loop packages.
+This project uses **agentkit** for OCI-backed Agent Loop and Agent Skill artifacts.
 
 ### Agent Rules
 
-- Run `loop prime` before executing a loop package.
-- Use `loop validate <loop.yml>` before packaging or publishing local loop files.
-- Use `loop pull <ref>` to cache a package and `loop run <ref>` to print the loop YAML.
-- When running a loop, act only as the orchestrator described by `loop prime`.
-- Do not copy the full prime instructions here; `loop prime` is the source of current workflow guidance.
+- Run `agentkit prime` before executing an Agent Loop artifact.
+- Use `agentkit loop validate <loop.yml>` before pushing local loop files.
+- Use `agentkit skill validate <skill-dir>` before pushing local skill directories.
+- Use `agentkit loop pull <ref>` and `agentkit skill pull <ref>` to pull artifacts into `.agents/`.
+- When running a loop, act only as the orchestrator described by `agentkit prime`.
+- Do not copy the full prime instructions here; `agentkit prime` is the source of current workflow guidance.
 
 ### Quick Reference
 
 ```bash
-loop prime
-loop validate ./loop.yml
-loop pull ghcr.io/owner/repo/package:tag
-loop run ghcr.io/owner/repo/package:tag
+agentkit prime
+agentkit loop validate ./loop.yml
+agentkit loop render ./loop.yml
+agentkit loop pull ghcr.io/owner/repo/package:tag
+agentkit skill pull ghcr.io/owner/repo/skill:tag
 ```
-<!-- END LOOP INTEGRATION -->
+<!-- END AGENTKIT INTEGRATION -->

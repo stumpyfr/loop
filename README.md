@@ -1,182 +1,130 @@
-# loop
+# agentkit
 
-`loop` validates a YAML file, packages it as an OCI artifact, and uploads it
-to a Docker-compatible package registry.
+`agentkit` pushes, pulls, validates, and inspects OCI-backed Agent Loops
+and Agent Skills.
 
 ## Install
 
 Install the latest GitHub release for your platform and architecture:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/stumpyfr/loop/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/stumpyfr/agentkit/main/install.sh | sh
 ```
 
-The installer downloads the matching `loop` binary from the latest release
-and installs it to `/usr/local/bin` by default. Override the destination with
-`INSTALL_DIR`:
+The installer downloads the matching `agentkit` binary and installs it to
+`/usr/local/bin` by default. Override the destination with `INSTALL_DIR`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/stumpyfr/loop/main/install.sh | INSTALL_DIR="$HOME/.local/bin" sh
+curl -fsSL https://raw.githubusercontent.com/stumpyfr/agentkit/main/install.sh | INSTALL_DIR="$HOME/.local/bin" sh
 ```
 
-## Usage
+## Commands
 
 ```bash
-loop push ./package.yml ghcr.io/github-owner/repo-name/package-name:latest
-loop init
-loop validate ./package.yml
-loop render ./package.yml
-loop pull ghcr.io/github-owner/repo-name/package-name:latest
-loop run ghcr.io/github-owner/repo-name/package-name:latest
-loop quickstart
-loop prime
+agentkit loop push ./loop.yml ghcr.io/owner/repo/loop-name:0.1.0
+agentkit loop pull ghcr.io/owner/repo/loop-name:0.1.0
+agentkit loop render ./loop.yml
+agentkit loop render ghcr.io/owner/repo/loop-name:0.1.0
+agentkit loop validate ./loop.yml
+agentkit loop collection push ./loops.json ghcr.io/owner/repo/loops:0.1.0
+
+agentkit skill push ./skill-dir ghcr.io/owner/repo/skill-name:1.0.0
+agentkit skill pull ghcr.io/owner/repo/skill-name:1.0.0
+agentkit skill validate ./skill-dir
+agentkit skill collection push ./skills.json ghcr.io/owner/repo/skills:1.0.0
 ```
 
-Initialize agent instructions by creating or updating a managed `AGENTS.md`
-block that points agents to `loop prime`:
-
-```bash
-loop init
-```
-
-Validate checks YAML syntax, duplicate mapping keys, and the embedded loop JSON
-Schema:
-
-```bash
-loop validate ./package.yml
-```
-
-Render displays phases, transitions, self-loops, and root escalation inputs as a
-terminal flowchart:
-
-```bash
-loop render ./package.yml
-loop render --no-color ./package.yml
-loop render --details ghcr.io/github-owner/repo-name/package-name:latest
-```
-
-Optional flags:
-
-```bash
-loop \
-  push \
-  --artifact-type application/vnd.arkham.loop.package.v1+yaml \
-  --layer-media-type application/vnd.arkham.loop.package.config.v1+yaml \
-  ./package.yml \
-  ghcr.io/github-owner/repo-name/package-name:v1.0.0
-```
-
-The target reference follows the same shape as `docker push`:
+Pull commands auto-detect whether the reference points to a single artifact
+or a collection. Pulled artifacts default to `.agents/`:
 
 ```text
-registry/namespace/package_name:tag
+.agents/
+  loops/<loop-name>/loop.yml
+  loops/<loop-name>/<version>/loop.yml
+  skills/<skill-name>/SKILL.md
+  skills/<skill-name>/<version>/SKILL.md
+  agentkit.json
+  agentkit.lock.json
 ```
 
-For example, multiple packages can live under the same GitHub repository path:
+Override the agentkit root with `--agents-dir`:
 
 ```bash
-loop push ./package-one.yml ghcr.io/arkham-advisory/test-loophub/package-one:latest
-loop push ./package-two.yml ghcr.io/arkham-advisory/test-loophub/package-two:latest
+agentkit loop pull --agents-dir .custom-agents ghcr.io/owner/repo/loop-name:0.1.0
+agentkit skill pull --agents-dir .custom-agents ghcr.io/owner/repo/skill-name:1.0.0
 ```
 
-Pulling stores the packaged YAML in the local cache and prints Docker-like
-status output:
+## OCI Media Types
 
-```bash
-loop pull ghcr.io/arkham-advisory/test-loophub/package-one:latest
-```
-
-Use `--output` to also copy it to a file:
-
-```bash
-loop pull \
-  --output package-one.yml \
-  ghcr.io/arkham-advisory/test-loophub/package-one:latest
-```
-
-Running displays the cached YAML. If the package is not cached locally, it is
-pulled first:
-
-```bash
-loop run ghcr.io/arkham-advisory/test-loophub/package-one:latest
-```
-
-Quickstart prints a human-friendly getting-started guide:
-
-```bash
-loop quickstart
-```
-
-Prime prints agent-facing workflow context for authenticating to the registry,
-pulling packages, and displaying loop YAML:
-
-```bash
-loop prime
-```
-
-This helps an agent handle prompts like:
+Agent Loops:
 
 ```text
-run the loop ghcr.io/Arkham-Advisory/test-loophub/test:0.1.0 with the jira ticket TEST-42
+application/vnd.agentloops.loop.v1
+application/vnd.agentloops.loop.content.v1+yaml
+application/vnd.agentloops.loop.collection.v1
 ```
 
-For GHCR targets in `ghcr.io/<owner>/<repo>/<package>:<tag>` form, the CLI adds
-`org.opencontainers.image.source=https://github.com/<owner>/<repo>` to the OCI
-manifest so GitHub can associate the package with the repository. Packages that
-were already published without this metadata may need to be connected manually
-from the organization package page, or republished with the annotation.
+Agent Skills:
 
-Authentication uses Docker-compatible registry credentials. For GHCR, login
-before pushing:
+```text
+application/vnd.agentskills.skill.v1
+application/vnd.agentskills.skill.config.v1+json
+application/vnd.agentskills.skill.content.v1.tar+gzip
+application/vnd.agentskills.collection.v1
+```
+
+## Collections
+
+Collection files are JSON and can use either `refs` or `items`:
+
+```json
+{
+  "name": "engineering-toolbox",
+  "refs": [
+    "ghcr.io/acme/loops/implement-feature:0.1.0",
+    "ghcr.io/acme/loops/review-loop:0.2.0"
+  ]
+}
+```
+
+```json
+{
+  "name": "engineering-skills",
+  "items": [
+    {
+      "name": "github-pr-review",
+      "ref": "ghcr.io/acme/skills/github-pr-review:1.4.0"
+    }
+  ]
+}
+```
+
+## Authentication
+
+Authentication uses Docker-compatible registry credentials. For GHCR:
 
 ```bash
 docker login ghcr.io
 ```
 
-For CI or non-Docker environments, GHCR credentials can also be supplied through
-environment variables:
+For CI or non-Docker environments:
 
 ```bash
 export GHCR_USERNAME=github-user-or-org
 export GHCR_TOKEN=github-token-with-write-packages
-loop push ./package.yml ghcr.io/github-owner/repo-name/package-name:latest
 ```
 
 In GitHub Actions, `GITHUB_ACTOR` and `GITHUB_TOKEN` are used automatically when
 the `GHCR_*` variables are not set.
 
-The `push` command requires exactly two positional parameters:
+## Agent Guidance
 
-1. A `.yml` or `.yaml` file.
-2. A tagged OCI package reference in `registry/namespace/package_name:tag` form.
+```bash
+agentkit init
+agentkit quickstart
+agentkit prime
+```
 
-The `validate` command requires one `.yml` or `.yaml` file and validates it
-against the embedded loop schema. `push` runs the same validation before
-packaging.
-
-The `render` command requires one local `.yml`/`.yaml` file or tagged OCI
-package reference. It validates the loop, then prints an ANSI-colored flowchart.
-Use `--no-color` or `NO_COLOR=1` for plain output, and `--details` for compact
-phase actions, completion, and outputs.
-
-The `init` command takes no positional arguments and creates or updates a
-managed Loop block in `AGENTS.md`. Use `--agents-file <path>` to target a
-different agent instruction file.
-
-The `pull` command requires one tagged OCI package reference and accepts
-`--output <file>` when you want to copy the cached YAML to a file.
-
-The `run` command requires one tagged OCI package reference and prints the YAML
-to stdout, pulling it first when it is not already cached.
-
-The `help` command takes an optional command name and prints grouped command
-help. Agent-oriented help points agents to `loop prime` before executing a
-loop package.
-
-The `quickstart` command takes no arguments and prints instructions that another
-human can follow.
-
-The `prime` command takes no arguments and prints instructions that another
-agent can follow, including how to resolve `spec.inputs` before execution and
-run loop phases with sub-agents. It also describes the orchestrator role and
-the `.loop/runs/yyyy/mm/dd/hh/mm` artifact layout for loop runs.
+`agentkit prime` prints agent-facing workflow context for resolving loop inputs,
+pulling loop and skill dependencies, orchestrating phases, and writing run
+artifacts.

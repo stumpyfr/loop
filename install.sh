@@ -1,9 +1,9 @@
 #!/bin/sh
 set -eu
 
-REPO="${REPO:-stumpyfr/loop}"
+REPO="${REPO:-stumpyfr/agentkit}"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-BINARY_NAME="${BINARY_NAME:-loop}"
+BINARY_NAME="${BINARY_NAME:-agentkit}"
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
@@ -40,21 +40,13 @@ case "$arch" in
 esac
 
 asset="${BINARY_NAME}_${os}_${arch}${ext}"
-legacy_asset="loop_cli_${os}_${arch}${ext}"
 base_url="https://github.com/${REPO}/releases/latest/download"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT INT TERM
 
 echo "Downloading ${asset} from ${REPO} latest release..."
 download_asset="$asset"
-if ! curl -fsSL "${base_url}/${download_asset}" -o "${tmp_dir}/${download_asset}"; then
-  if [ "$legacy_asset" = "$asset" ]; then
-    exit 1
-  fi
-  echo "Falling back to legacy release asset ${legacy_asset}..."
-  download_asset="$legacy_asset"
-  curl -fsSL "${base_url}/${download_asset}" -o "${tmp_dir}/${download_asset}"
-fi
+curl -fsSL "${base_url}/${download_asset}" -o "${tmp_dir}/${download_asset}"
 curl -fsSL "${base_url}/${download_asset}.sha256" -o "${tmp_dir}/${download_asset}.sha256"
 
 if command -v sha256sum >/dev/null 2>&1; then
